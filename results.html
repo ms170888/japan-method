@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Your personalized Japanese productivity method recommendations based on your assessment.">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="author" content="Japan Method">
+
+  <title>Your Results - Japan Method</title>
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500&family=Noto+Serif+JP:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="/src/styles/main.css">
+
+  <style>
+    /* Results-specific styles */
+    .results-loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 50vh;
+      text-align: center;
+    }
+
+    .loading-spinner {
+      width: 48px;
+      height: 48px;
+      border: 3px solid var(--color-soft-gray);
+      border-top-color: var(--color-accent);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: var(--space-6);
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .match-score {
+      display: inline-flex;
+      align-items: center;
+      gap: var(--space-2);
+      padding: var(--space-2) var(--space-4);
+      background-color: var(--color-light-gray);
+      border-radius: 50px;
+      font-size: var(--text-sm);
+      font-weight: 500;
+    }
+
+    .match-score--high {
+      background-color: rgba(139, 154, 125, 0.2);
+      color: var(--color-sage);
+    }
+
+    .match-bar {
+      width: 100%;
+      height: 8px;
+      background-color: var(--color-soft-gray);
+      border-radius: 4px;
+      overflow: hidden;
+      margin-top: var(--space-4);
+    }
+
+    .match-bar__fill {
+      height: 100%;
+      background-color: var(--color-accent);
+      border-radius: 4px;
+      transition: width 0.6s ease;
+    }
+
+    .implementation-preview {
+      background-color: var(--color-light-gray);
+      border-radius: var(--border-radius);
+      padding: var(--space-6);
+      margin-top: var(--space-6);
+    }
+
+    .implementation-preview h4 {
+      margin-bottom: var(--space-4);
+    }
+
+    .implementation-preview ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .implementation-preview li {
+      position: relative;
+      padding-left: var(--space-6);
+      margin-bottom: var(--space-3);
+      color: var(--color-dark-gray);
+    }
+
+    .implementation-preview li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 8px;
+      width: 8px;
+      height: 8px;
+      background-color: var(--color-sage);
+      border-radius: 50%;
+    }
+
+    .locked-content {
+      position: relative;
+      max-height: 200px;
+      overflow: hidden;
+    }
+
+    .locked-content::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 150px;
+      background: linear-gradient(to bottom, transparent, var(--color-white));
+      pointer-events: none;
+    }
+
+    .unlock-cta {
+      position: absolute;
+      bottom: var(--space-4);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      text-align: center;
+    }
+
+    .other-methods {
+      display: grid;
+      gap: var(--space-4);
+    }
+
+    .other-method-card {
+      display: flex;
+      align-items: center;
+      gap: var(--space-6);
+      padding: var(--space-6);
+      background-color: var(--color-white);
+      border: 1px solid var(--color-soft-gray);
+      border-radius: var(--border-radius);
+    }
+
+    .other-method-card__jp {
+      font-family: 'Noto Sans JP', sans-serif;
+      font-size: var(--text-2xl);
+      color: var(--color-light-gray);
+      min-width: 80px;
+    }
+
+    .other-method-card__info {
+      flex: 1;
+    }
+
+    .other-method-card__info h4 {
+      margin-bottom: var(--space-1);
+    }
+
+    .other-method-card__score {
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- Header -->
+  <header class="header">
+    <div class="header__inner">
+      <a href="/" class="logo">Japan<span>Method</span></a>
+      <nav class="nav" id="nav">
+        <a href="/" class="nav__link">Home</a>
+        <a href="/about" class="nav__link">About</a>
+        <a href="/pricing" class="nav__link">Pricing</a>
+        <a href="/#quiz" class="btn btn--primary">Retake Assessment</a>
+      </nav>
+      <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Results Loading State -->
+  <section class="section results" id="resultsLoading">
+    <div class="container">
+      <div class="results-loading">
+        <div class="loading-spinner"></div>
+        <h2>Analyzing Your Responses...</h2>
+        <p>Finding the perfect Japanese productivity methods for you.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Results Content (hidden by default) -->
+  <section class="section results hidden" id="resultsContent" style="padding-top: calc(72px + var(--space-12));">
+    <div class="container container--narrow">
+      <!-- Results Header -->
+      <div class="results__header">
+        <span class="jp-accent">Your Personalized Results</span>
+        <h1 class="results__title">Your Recommended Methods</h1>
+        <p class="results__subtitle">
+          Based on your responses, we've identified the Japanese productivity methods that best match your goals and lifestyle.
+        </p>
+      </div>
+
+      <!-- Primary Recommendation -->
+      <div class="result-card result-card--primary" id="primaryResult">
+        <span class="result-card__label">Best Match</span>
+        <div class="result-card__method">
+          <div class="result-card__jp" id="primaryJp">5S</div>
+          <div class="result-card__info">
+            <h3 id="primaryTitle">5S System</h3>
+            <div class="match-score match-score--high">
+              <span id="primaryScore">92%</span> Match
+            </div>
+          </div>
+        </div>
+
+        <div class="match-bar">
+          <div class="match-bar__fill" id="primaryBar" style="width: 92%;"></div>
+        </div>
+
+        <div class="result-card__description">
+          <p id="primaryDescription">
+            The 5S System is your ideal starting point. This workplace organization methodology will help you create an efficient, clutter-free environment that supports peak productivity.
+          </p>
+
+          <div class="implementation-preview">
+            <h4>Quick Start Implementation</h4>
+            <ul id="primarySteps">
+              <li>Sort through your workspace, keeping only essential items</li>
+              <li>Set everything in order with designated places</li>
+              <li>Shine your space with regular cleaning routines</li>
+              <li>Standardize your organization system</li>
+              <li>Sustain through daily habits and audits</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Secondary Recommendations -->
+      <h3 class="mb-6 mt-8">Also Recommended For You</h3>
+      <div class="other-methods" id="otherMethods">
+        <div class="other-method-card">
+          <div class="other-method-card__jp">kaizen</div>
+          <div class="other-method-card__info">
+            <h4>Kaizen</h4>
+            <p class="text-small text-muted">Continuous improvement through small daily changes</p>
+          </div>
+          <div class="other-method-card__score">
+            <span class="match-score">78% Match</span>
+          </div>
+        </div>
+
+        <div class="other-method-card">
+          <div class="other-method-card__jp">ikigai</div>
+          <div class="other-method-card__info">
+            <h4>Ikigai</h4>
+            <p class="text-small text-muted">Find your reason for being and purposeful work</p>
+          </div>
+          <div class="other-method-card__score">
+            <span class="match-score">65% Match</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Locked Implementation Guide -->
+      <div class="result-card mt-8" style="position: relative;">
+        <h3 class="mb-4">Complete Implementation Guide</h3>
+
+        <div class="locked-content" id="lockedContent">
+          <p>Your personalized 30-day implementation plan includes:</p>
+
+          <div class="grid grid--2" style="margin-top: var(--space-6);">
+            <div>
+              <h4>Week 1: Foundation</h4>
+              <ul style="list-style: disc; padding-left: var(--space-6); color: var(--color-dark-gray);">
+                <li>Complete environment assessment</li>
+                <li>Identify problem areas</li>
+                <li>Set measurable goals</li>
+                <li>Gather necessary supplies</li>
+              </ul>
+            </div>
+            <div>
+              <h4>Week 2: Implementation</h4>
+              <ul style="list-style: disc; padding-left: var(--space-6); color: var(--color-dark-gray);">
+                <li>Begin systematic organization</li>
+                <li>Establish daily routines</li>
+                <li>Create visual management systems</li>
+                <li>Document your progress</li>
+              </ul>
+            </div>
+            <div>
+              <h4>Week 3: Refinement</h4>
+              <ul style="list-style: disc; padding-left: var(--space-6); color: var(--color-dark-gray);">
+                <li>Address challenges encountered</li>
+                <li>Optimize your systems</li>
+                <li>Extend to additional areas</li>
+                <li>Build supporting habits</li>
+              </ul>
+            </div>
+            <div>
+              <h4>Week 4: Sustainability</h4>
+              <ul style="list-style: disc; padding-left: var(--space-6); color: var(--color-dark-gray);">
+                <li>Establish maintenance routines</li>
+                <li>Create audit checklists</li>
+                <li>Plan for continuous improvement</li>
+                <li>Set long-term goals</li>
+              </ul>
+            </div>
+          </div>
+
+          <p style="margin-top: var(--space-6);">
+            Plus detailed worksheets, tracking templates, and advanced techniques...
+          </p>
+        </div>
+
+        <div class="unlock-cta">
+          <a href="/pricing" class="btn btn--primary btn--large">Unlock Full System - From $19</a>
+          <p class="text-small text-muted mt-4">30-day money-back guarantee</p>
+        </div>
+      </div>
+
+      <!-- Email Capture -->
+      <div class="result-card mt-8 text-center" style="background-color: var(--color-light-gray);">
+        <h3 class="mb-4">Get Your Free Method Guide</h3>
+        <p style="max-width: 450px; margin: 0 auto var(--space-6);">
+          Enter your email to receive the complete guide for your top recommended method - absolutely free.
+        </p>
+
+        <form id="emailForm" style="max-width: 400px; margin: 0 auto;">
+          <div class="form-group" style="margin-bottom: var(--space-4);">
+            <input type="email" class="form-input" placeholder="Enter your email" required id="emailInput">
+          </div>
+          <button type="submit" class="btn btn--primary btn--full">Send My Free Guide</button>
+          <p class="text-small text-muted mt-4">No spam. Unsubscribe anytime.</p>
+        </form>
+      </div>
+
+      <!-- Share Results -->
+      <div class="text-center mt-8">
+        <p class="text-muted mb-4">Share your results</p>
+        <div class="flex-center gap-4">
+          <a href="#" class="btn btn--ghost" id="shareTwitter">Share on Twitter</a>
+          <a href="#" class="btn btn--ghost" id="copyLink">Copy Link</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="section section--dark hidden" id="resultsCta">
+    <div class="container text-center">
+      <span class="jp-accent" style="color: var(--color-accent-light);">What Now?</span>
+      <h2>Put Your Method to Work</h2>
+      <p style="max-width: 500px; margin: 0 auto var(--space-8);">
+        Get the complete implementation system with guides, worksheets, and tracking tools for all six Japanese methods.
+      </p>
+      <div class="flex-center gap-4">
+        <a href="/pricing" class="btn btn--primary btn--large">View Pricing</a>
+        <a href="/#quiz" class="btn btn--secondary btn--large">Retake Assessment</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer__grid">
+        <div class="footer__brand">
+          <div class="footer__logo">Japan<span>Method</span></div>
+          <p class="footer__tagline">
+            Bringing the wisdom of Japanese productivity methods to the modern world.
+          </p>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Methods</h4>
+          <div class="footer__links">
+            <a href="/about#5s" class="footer__link">5S System</a>
+            <a href="/about#kaizen" class="footer__link">Kaizen</a>
+            <a href="/about#konmari" class="footer__link">KonMari</a>
+            <a href="/about#ikigai" class="footer__link">Ikigai</a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Company</h4>
+          <div class="footer__links">
+            <a href="/about" class="footer__link">About</a>
+            <a href="/pricing" class="footer__link">Pricing</a>
+            <a href="mailto:hello@japanmethod.com" class="footer__link">Contact</a>
+          </div>
+        </div>
+
+        <div>
+          <h4 class="footer__heading">Legal</h4>
+          <div class="footer__links">
+            <a href="/legal/terms" class="footer__link">Terms of Service</a>
+            <a href="/legal/privacy" class="footer__link">Privacy Policy</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer__bottom">
+        <p>&copy; 2025 Japan Method. All rights reserved.</p>
+        <p>Made with care for productivity enthusiasts everywhere.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="/src/lib/methods-content.js"></script>
+  <script src="/src/lib/bundle.js"></script>
+  <script>
+    // Results page specific logic
+    document.addEventListener('DOMContentLoaded', function() {
+      // Simulate loading and show results
+      setTimeout(function() {
+        document.getElementById('resultsLoading').classList.add('hidden');
+        document.getElementById('resultsContent').classList.remove('hidden');
+        document.getElementById('resultsCta').classList.remove('hidden');
+
+        // Load results from localStorage if available
+        if (window.JapanMethod && window.JapanMethod.loadResults) {
+          window.JapanMethod.loadResults();
+        }
+      }, 1500);
+    });
+  </script>
+</body>
+</html>

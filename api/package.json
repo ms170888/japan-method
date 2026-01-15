@@ -1,0 +1,9 @@
+{
+  "name": "japan-method-api",
+  "version": "1.0.0",
+  "description": "API functions for Japan Method",
+  "type": "module",
+  "dependencies": {
+    "stripe": "^14.0.0"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "name": "japan-method",
+  "version": "1.0.0",
+  "description": "Japan Method - Beyond Kaizen: Authentic Japanese Productivity",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx serve .",
+    "build": "echo 'Static site ready'",
+    "start": "npx serve ."
+  },
+  "keywords": [
+    "japanese",
+    "productivity",
+    "kaizen",
+    "hourensou",
+    "nemawashi",
+    "hansei",
+    "business",
+    "methods"
+  ],
+  "author": "Japan Method",
+  "license": "MIT",
+  "dependencies": {
+    "serve": "^14.2.0"
+  }
+}
